@@ -375,7 +375,7 @@ const KeyAppFeatures = () => {
               accurate, secure, and shareable with the people who matter.
             </p>
           </div>
-          <div className="hidden md:flex items-center gap-3 text-xs text-slate-400">
+          <div className="hidden md:flex items-center gap-3 text-xs text-white">
             <div className="flex -space-x-2">
               <span className="w-7 h-7 rounded-full bg-slate-800 border border-slate-600" />
               <span className="w-7 h-7 rounded-full bg-slate-800 border border-slate-600" />
@@ -446,11 +446,6 @@ const KeyAppFeatures = () => {
 
 const ScreensWalkthrough = () => {
   const [guidedIndex, setGuidedIndex] = useState(0);
-  const headingRef = useRef<HTMLHeadingElement | null>(null);
-  const headingInView = useInView(headingRef, { once: true, margin: "-100px" });
-  const walkthroughText = "walkthrough";
-  const typedLength = headingInView ? walkthroughText.length : 0;
-
   const guidedImages = [guidedQuestion1Img, guidedQuestion2Img];
 
   useEffect(() => {
@@ -482,25 +477,10 @@ const ScreensWalkthrough = () => {
   return (
     <section id="screens" className="section-padding bg-accent overflow-hidden">
       <div className="max-w-[1400px] mx-auto px-6">
-        <div className="text-center mb-32">
-          <h2
-            ref={headingRef}
-            className="text-4xl md:text-5xl font-black tracking-tight text-white leading-tight mb-6"
-          >
+        <div className="text-center mb-24">
+          <h2 className="text-4xl md:text-5xl font-black tracking-tight text-white leading-tight mb-6">
             App{" "}
-            <span className="text-white italic serif-font">
-              {headingInView ? walkthroughText.slice(0, typedLength) : ""}
-            </span>
-            <span className="inline-block w-[10px] ml-[1px] align-middle">
-              {headingInView && (
-                <motion.span
-                  initial={{ opacity: 1 }}
-                  animate={{ opacity: [1, 0, 1] }}
-                  transition={{ repeat: Infinity, duration: 0.9 }}
-                  className="block h-5 md:h-6 w-[2px] bg-white"
-                />
-              )}
-            </span>
+            <span className="text-white italic serif-font">walkthrough</span>
           </h2>
           <p className="text-sm md:text-base text-white/70 font-medium uppercase tracking-[0.28em]">
             Experience the simplicity
@@ -514,7 +494,7 @@ const ScreensWalkthrough = () => {
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.2 }}
+              transition={{ delay: i * 0.08, duration: 0.35, ease: [0.2, 0.9, 0.3, 1] }}
               className="flex flex-col items-center"
             >
               <div className="w-full max-w-[300px] aspect-[9/18] bg-white rounded-[3rem] border-[10px] border-slate-300 overflow-hidden mb-6 shadow-[0_24px_80px_rgba(15,23,42,0.9)] relative">
@@ -715,28 +695,15 @@ const Testimonials = () => {
 };
 
 const BackgroundReveal = () => {
-  const targetRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: targetRef,
-    offset: ["start center", "end start"],
-  });
-
-  // Much smoother, gentler motion ranges
-  const opacity = useTransform(scrollYProgress, [0, 0.4, 1], [0, 1, 1]);
-  const scale = useTransform(scrollYProgress, [0, 0.4, 1], [0.96, 1, 1.02]);
-  const bgOpacity = useTransform(scrollYProgress, [0, 0.4, 1], [0, 0.45, 0.45]);
-  const bgScale = useTransform(scrollYProgress, [0, 0.4, 1], [1.02, 1, 1.03]);
-
   return (
-    <section
-      ref={targetRef}
-      className="relative h-[140vh] flex items-center justify-center overflow-hidden bg-primary will-change-transform"
-    >
+    <section className="relative h-[110vh] flex items-center justify-center overflow-hidden bg-primary">
       {/* Background Image that reveals as you scroll */}
       <motion.div
-        style={{ opacity: bgOpacity, scale: bgScale }}
-        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-        className="absolute inset-0 z-0"
+        initial={{ opacity: 0, scale: 1.02 }}
+        whileInView={{ opacity: 0.45, scale: 1 }}
+        viewport={{ once: true, amount: 0.4 }}
+        transition={{ duration: 0.5, ease: [0.2, 0.9, 0.3, 1] }}
+        className="absolute inset-0 z-0 will-change-transform"
       >
         <img 
           src={happyFamilyPhoto} 
@@ -748,21 +715,18 @@ const BackgroundReveal = () => {
 
       <div className="container mx-auto px-6 relative z-20 text-center">
         <motion.div
-          style={{ opacity, scale }}
-          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-          className="max-w-3xl mx-auto will-change-transform"
+          initial={{ opacity: 0, y: 24, scale: 0.97 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          viewport={{ once: true, amount: 0.4 }}
+          transition={{ duration: 0.5, ease: [0.2, 0.9, 0.3, 1] }}
+          className="max-w-3xl mx-auto"
         >
           <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tight text-white leading-tight drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
             Your Legacy <br />
             <span className="serif-font italic text-accent">Preserved</span>
           </h2>
           <div className="mt-10 flex flex-col items-center">
-            <motion.div
-              initial={{ height: 0 }}
-              whileInView={{ height: 96 }}
-              transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
-              className="w-px bg-gradient-to-b from-accent to-transparent" 
-            />
+            <div className="h-16 w-px bg-gradient-to-b from-accent to-transparent" />
             <p className="mt-6 text-white text-base md:text-lg font-black uppercase tracking-[0.4em] max-w-md mx-auto leading-relaxed drop-shadow-lg">
               Secure. Private. <br />
               <span className="text-accent">Always Accessible.</span>
