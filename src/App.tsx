@@ -160,7 +160,7 @@ const Hero = () => {
             transition={{ delay: 0.2 }}
             className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-slate-900/60 border border-white/10 shadow-sm text-slate-100 text-[10px] font-black uppercase tracking-[0.22em] mb-10"
           >
-            <Smartphone className="w-3 h-3 text-accent" /> Now Available on iOS & Android
+            <Smartphone className="w-3 h-3 text-accent" /> Secure Digital Will Planning
           </motion.div>
           
           <h1 className="text-5xl md:text-[4.75rem] lg:text-[5.5rem] font-black tracking-tight leading-[0.95] font-display mb-8 text-white">
@@ -185,11 +185,11 @@ const Hero = () => {
               <a 
                 href="#download" 
                 data-cursor="DOWNLOAD"
-                className="inline-flex items-center justify-center gap-3 px-16 py-5 rounded-full text-base md:text-lg font-black uppercase tracking-[0.24em] bg-[#1A365D] text-white shadow-[0_22px_60px_rgba(15,23,42,0.9)] border border-white/30 group relative overflow-hidden"
+                className="inline-flex items-center justify-center gap-2.5 px-10 md:px-12 py-4 rounded-full text-sm md:text-base font-black uppercase tracking-[0.2em] bg-[#1A365D] text-white shadow-[0_18px_46px_rgba(15,23,42,0.85)] border border-white/30 group relative overflow-hidden"
               >
                 <span className="relative z-10 flex items-center gap-3">
                   Download the App
-                  <Download className="w-6 h-6 group-hover:translate-y-1 transition-transform" />
+                  <Download className="w-5 h-5 group-hover:translate-y-1 transition-transform" />
                 </span>
                 <motion.div 
                   className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
@@ -488,13 +488,9 @@ const ScreensWalkthrough = () => {
         </div>
 
         <div className="grid md:grid-cols-3 gap-16 lg:gap-20">
-          {screens.map((s, i) => (
-            <motion.div
+          {screens.map((s) => (
+            <div
               key={s.title}
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.08, duration: 0.35, ease: [0.2, 0.9, 0.3, 1] }}
               className="flex flex-col items-center"
             >
               <div className="w-full max-w-[300px] aspect-[9/18] bg-white rounded-[3rem] border-[10px] border-slate-300 overflow-hidden mb-6 shadow-[0_24px_80px_rgba(15,23,42,0.9)] relative">
@@ -538,7 +534,7 @@ const ScreensWalkthrough = () => {
                   {s.desc}
                 </p>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
@@ -697,30 +693,17 @@ const Testimonials = () => {
 const BackgroundReveal = () => {
   return (
     <section className="relative h-[110vh] flex items-center justify-center overflow-hidden bg-primary">
-      {/* Background Image that reveals as you scroll */}
-      <motion.div
-        initial={{ opacity: 0, scale: 1.02 }}
-        whileInView={{ opacity: 0.45, scale: 1 }}
-        viewport={{ once: true, amount: 0.4 }}
-        transition={{ duration: 0.5, ease: [0.2, 0.9, 0.3, 1] }}
-        className="absolute inset-0 z-0 will-change-transform"
-      >
+      <div className="absolute inset-0 z-0 opacity-45">
         <img 
           src={happyFamilyPhoto} 
           alt="Legacy Background"
           className="w-full h-full object-cover grayscale contrast-125 brightness-50"
           referrerPolicy="no-referrer"
         />
-      </motion.div>
+      </div>
 
       <div className="container mx-auto px-6 relative z-20 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 24, scale: 0.97 }}
-          whileInView={{ opacity: 1, y: 0, scale: 1 }}
-          viewport={{ once: true, amount: 0.4 }}
-          transition={{ duration: 0.5, ease: [0.2, 0.9, 0.3, 1] }}
-          className="max-w-3xl mx-auto"
-        >
+        <div className="max-w-3xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tight text-white leading-tight drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
             Your Legacy <br />
             <span className="serif-font italic text-accent">Preserved</span>
@@ -731,25 +714,19 @@ const BackgroundReveal = () => {
               Secure. Private. <br />
               <span className="text-accent">Always Accessible.</span>
             </p>
-            <motion.a
+            <a
               href="#download"
-              initial={{ opacity: 0, y: 14 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
               className="mt-8 inline-flex items-center gap-3 px-8 py-3 rounded-full bg-accent text-slate-950 font-black uppercase tracking-[0.22em] text-[11px] shadow-[0_18px_40px_rgba(15,23,42,0.8)] border border-white/40"
             >
               Start protecting my legacy
               <ArrowRight className="w-4 h-4" />
-            </motion.a>
+            </a>
           </div>
-        </motion.div>
+        </div>
       </div>
       
-      {/* Darkening overlays to help text pop */}
       <div className="absolute inset-0 bg-gradient-to-b from-primary via-transparent to-primary opacity-80 pointer-events-none z-10" />
       
-      {/* Decorative borders to frame the reveal */}
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent z-20" />
       <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent z-20" />
     </section>
@@ -1116,9 +1093,10 @@ const FinalCTA = ({ onToast }: { onToast?: ToastFn }) => {
 const SignaturePad = () => {
   const [enabled, setEnabled] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
+  const [isCoarsePointer, setIsCoarsePointer] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const timeoutRef = useRef<number | null>(null);
-   const clearRef = useRef<number | null>(null);
+  const clearRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!enabled || !canvasRef.current) return;
@@ -1135,6 +1113,16 @@ const SignaturePad = () => {
       ctx.strokeStyle = "#020617"; // slate-900 ink
     }
   }, [enabled]);
+
+  useEffect(() => {
+    const media = window.matchMedia("(pointer: coarse)");
+    const updatePointerMode = () => setIsCoarsePointer(media.matches);
+
+    updatePointerMode();
+    media.addEventListener("change", updatePointerMode);
+
+    return () => media.removeEventListener("change", updatePointerMode);
+  }, []);
 
   const startLongPress = () => {
     if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
@@ -1184,10 +1172,21 @@ const SignaturePad = () => {
     }
   };
 
+  const handleActivationPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (enabled) return;
+
+    if (isCoarsePointer || e.pointerType === "touch") {
+      setEnabled(true);
+      return;
+    }
+
+    startLongPress();
+  };
+
   return (
     <div
       className="absolute inset-0 z-30"
-      onPointerDown={startLongPress}
+      onPointerDown={handleActivationPointerDown}
       onPointerUp={cancelLongPress}
       onPointerLeave={cancelLongPress}
     >
@@ -1196,7 +1195,7 @@ const SignaturePad = () => {
           <div className="flex items-center justify-center gap-2">
             <span className="h-[1px] w-6 bg-slate-500/70" />
             <span className="font-semibold uppercase tracking-[0.25em] bg-white px-3 py-1 rounded-full shadow-sm border border-slate-300">
-              Press &amp; sign anywhere
+              {isCoarsePointer ? "Tap to sign anywhere" : "Press & sign anywhere"}
             </span>
             <span className="h-[1px] w-6 bg-slate-500/70" />
           </div>
@@ -1208,7 +1207,7 @@ const SignaturePad = () => {
       {enabled && (
         <canvas
           ref={canvasRef}
-          className="w-full h-full cursor-crosshair"
+          className="w-full h-full cursor-crosshair touch-none"
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
