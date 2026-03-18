@@ -1348,8 +1348,16 @@ const Footer = ({ onToast }: { onToast?: ToastFn }) => {
           className="pt-12 border-top border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] md:text-xs font-black uppercase tracking-[0.35em] text-slate-400"
         >
           <p>
-            © {new Date().getFullYear()} Developed B. Built for peace
-            of mind.
+            © {new Date().getFullYear()}{' '}
+            <a
+              href="https://www.xspark.co.za/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-slate-900 transition-colors"
+            >
+              Developed By X Spark
+            </a>
+            . Built for peace of mind.
           </p>
           <div className="flex gap-12">
             {['Twitter', 'LinkedIn', 'Instagram'].map((social, i) => (
