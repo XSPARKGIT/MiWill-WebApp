@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform, useInView } from 'motion/react';
 import { 
   CheckCircle2, 
@@ -185,7 +185,7 @@ const Hero = () => {
               <a 
                 href="#download" 
                 data-cursor="DOWNLOAD"
-                className="inline-flex items-center justify-center gap-2.5 px-10 md:px-12 py-4 rounded-full text-sm md:text-base font-black uppercase tracking-[0.2em] bg-[#1A365D] text-white shadow-[0_18px_46px_rgba(15,23,42,0.85)] border border-white/30 group relative overflow-hidden"
+                className="inline-flex items-center justify-center gap-2.5 px-10 md:px-12 py-4 rounded-full text-sm md:text-base font-black uppercase tracking-[0.2em] bg-[#368396] text-white shadow-[0_18px_46px_rgba(54,131,150,0.5)] border border-white/30 group relative overflow-hidden"
               >
                 <span className="relative z-10 flex items-center gap-3">
                   Download the App

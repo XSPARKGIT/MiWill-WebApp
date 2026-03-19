@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Menu, X } from "lucide-react";
-import mainLogo from "/assets/MainMiwillLogo.png";
+import mainLogo from "/assets/ThirdLogo.png";
 
 const NAV_LINKS = [
   { name: "About", href: "#about" },
