@@ -3,6 +3,7 @@ import {Navigate, Outlet, Route, BrowserRouter as Router, Routes, useLocation} f
 import LandingPage from '../App';
 import {AuthProvider, useAuth} from '../auth/AuthContext';
 import {AdminDashboardPage, AgentDashboardPage} from '../pages/DashboardPages';
+import {AgentOnboardingPage} from '../pages/AgentOnboardingPage';
 import {LoginPage} from '../pages/LoginPage';
 import {SignUpPage} from '../pages/SignUpPage';
 import {DashboardDataProvider} from '../context/DashboardDataContext';
@@ -28,7 +29,7 @@ function resolveAuthenticatedHome(role: 'admin' | 'agent' | undefined, from?: st
 }
 
 function ProtectedRoute() {
-  const {status} = useAuth();
+  const {status, profile, agentGateStep} = useAuth();
   const location = useLocation();
 
   if (status === 'loading') {
@@ -37,6 +38,33 @@ function ProtectedRoute() {
 
   if (status !== 'authenticated') {
     return <Navigate to="/login" replace state={{from: location}} />;
+  }
+
+  if (profile?.role === 'agent' && agentGateStep !== 'none') {
+    return <Navigate to="/agent-onboarding" replace />;
+  }
+
+  return <Outlet />;
+}
+
+function AgentOnboardingRoute() {
+  const {status, profile, agentGateStep} = useAuth();
+  const location = useLocation();
+
+  if (status === 'loading') {
+    return <AuthLoadingScreen />;
+  }
+
+  if (status !== 'authenticated') {
+    return <Navigate to="/login" replace state={{from: location}} />;
+  }
+
+  if (profile?.role !== 'agent') {
+    return <Navigate to={resolveAuthenticatedHome(profile?.role)} replace />;
+  }
+
+  if (agentGateStep === 'none') {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <Outlet />;
@@ -62,7 +90,7 @@ function AdminProtectedRoute() {
 }
 
 function PublicOnlyRoute() {
-  const {status, profile} = useAuth();
+  const {status, profile, agentGateStep} = useAuth();
   const location = useLocation();
 
   if (status === 'loading') {
@@ -71,6 +99,11 @@ function PublicOnlyRoute() {
 
   if (status === 'authenticated') {
     const from = (location.state as {from?: {pathname?: string}} | null)?.from?.pathname;
+
+    if (profile?.role === 'agent' && agentGateStep !== 'none') {
+      return <Navigate to="/agent-onboarding" replace />;
+    }
+
     return (
       <Navigate
         to={resolveAuthenticatedHome(profile?.role, from)}
@@ -94,6 +127,10 @@ export function AppRouter() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignUpPage />} />
             </Route>
+          </Route>
+
+          <Route element={<AgentOnboardingRoute />}>
+            <Route path="/agent-onboarding" element={<AgentOnboardingPage />} />
           </Route>
 
           <Route element={<ProtectedRoute />}>

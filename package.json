@@ -17,6 +17,8 @@
     "firebase:deploy:production": "npx firebase-tools deploy --project production --only hosting,firestore:rules,firestore:indexes,storage",
     "firebase:deploy:miwillapp-rules": "npx firebase-tools deploy --project production --config firebase.miwillapp.json --only firestore:rules",
     "firebase:deploy:portal-rules": "npx firebase-tools deploy --only firestore:rules --project miwill-dev",
+    "firebase:deploy:functions": "npx firebase-tools deploy --only functions --project miwill-dev",
+    "firebase:deploy:functions:production": "npx firebase-tools deploy --only functions --project miwillapp",
     "firebase:deploy:portal-rules:gcloud": "node scripts/deploy-firestore-rules.mjs staging firestore.rules",
     "firebase:deploy:miwillapp-rules:gcloud": "node scripts/deploy-firestore-rules.mjs production firestore.miwillapp.rules",
     "seed:dev-clients": "node scripts/seed-dev-clients.mjs",

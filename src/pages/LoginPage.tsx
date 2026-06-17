@@ -2,6 +2,7 @@ import {FormEvent, useEffect, useMemo, useState} from 'react';
 import {Eye, EyeOff, LoaderCircle} from 'lucide-react';
 import {useLocation, useNavigate} from 'react-router-dom';
 import {loginWithEmail, mapLoginError} from '../auth/authService';
+import {resolveAgentGateStep} from '../auth/agentGate';
 import {useAuth} from '../auth/AuthContext';
 import type {UserRole} from '../auth/AuthContext';
 import {
@@ -16,7 +17,7 @@ import {AuthInput, AuthMessage} from '../components/auth/AuthField';
 import {AuthSegmentTabs} from '../components/auth/AuthSegmentTabs';
 import {AuthShell} from '../components/auth/AuthShell';
 import {AuthSubmitButton} from '../components/auth/AuthSubmitButton';
-import {isFirebaseConfigured} from '../firebase/client';
+import {getPortalFirebaseAuth, isFirebaseConfigured} from '../firebase/client';
 
 type LoginLocationState = {
   from?: {pathname?: string};
@@ -36,7 +37,7 @@ export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const routeState = (location.state as LoginLocationState | null) ?? {};
-  const {applyProfile, status, profile} = useAuth();
+  const {applyProfile, status, profile, agentGateStep, refreshAgentClaims} = useAuth();
   const [email, setEmail] = useState(routeState.registeredEmail ?? '');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -48,11 +49,20 @@ export function LoginPage() {
   }, []);
 
   useEffect(() => {
-    if (status === 'authenticated') {
-      const role = profile?.role ?? 'agent';
-      navigate(postLoginPath(role, routeState.from?.pathname), {replace: true});
+    if (status === 'authenticated' && profile) {
+      if (profile.role === 'admin') {
+        navigate(postLoginPath('admin', routeState.from?.pathname), {replace: true});
+        return;
+      }
+
+      if (agentGateStep !== 'none') {
+        navigate('/agent-onboarding', {replace: true});
+        return;
+      }
+
+      navigate(postLoginPath(profile.role, routeState.from?.pathname), {replace: true});
     }
-  }, [navigate, profile?.role, routeState.from?.pathname, status]);
+  }, [agentGateStep, navigate, profile, routeState.from?.pathname, status]);
 
   const activeDemoEmail = useMemo(() => {
     const match = USERS.find(
@@ -78,7 +88,20 @@ export function LoginPage() {
       if (isFirebaseConfigured) {
         const signedInProfile = await loginWithEmail(email, password);
         applyProfile(signedInProfile);
+        await refreshAgentClaims();
         signedInRole = signedInProfile.role;
+
+        const auth = getPortalFirebaseAuth();
+        const token = await auth?.currentUser?.getIdTokenResult();
+        const claims = token?.claims ?? {};
+
+        if (
+          claims.role === 'agent' &&
+          resolveAgentGateStep(signedInProfile, claims) !== 'none'
+        ) {
+          navigate('/agent-onboarding', {replace: true});
+          return;
+        }
       } else {
         const session = attemptMockLogin(email, password);
         if (!session) {
@@ -91,6 +114,7 @@ export function LoginPage() {
         notifyMockAuthChanged();
         signedInRole = signedInProfile.role;
       }
+
       navigate(postLoginPath(signedInRole, routeState.from?.pathname), {replace: true});
     } catch (error) {
       setSubmitError(mapLoginError(error));

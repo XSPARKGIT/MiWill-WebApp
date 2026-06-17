@@ -16,6 +16,7 @@ import {
   isFirebaseConfigured,
 } from '../firebase/client';
 import {ensureMiwillAppAuth, signOutMiwillAppAuth} from '../firebase/miwillAppAuth';
+import {prepareAgentLoginCallable} from './agentMfaService';
 import {UserProfile, UserRole} from './AuthContext';
 import {
   DEMO_ACCOUNT_EMAIL,
@@ -43,6 +44,8 @@ function profileFromFirestoreData(uid: string, data: DocumentData, fallbackEmail
     role: data.role,
     isActive: data.isActive !== false,
     createdAt: typeof data.createdAt?.toDate === 'function' ? data.createdAt.toDate() : data.createdAt ?? null,
+    status: typeof data.status === 'string' ? data.status : undefined,
+    forcePasswordChange: data.forcePasswordChange === true,
   };
 }
 
@@ -236,6 +239,14 @@ export async function loginWithEmail(email: string, password: string): Promise<U
   if (!profile) {
     await signOut(auth);
     throw new Error('This account does not have a valid admin portal role.');
+  }
+
+  if (profile.role === 'agent') {
+    try {
+      await prepareAgentLoginCallable();
+    } catch {
+      /* Functions may not be deployed yet; gate screen will still apply from Firestore status. */
+    }
   }
 
   try {

@@ -1,6 +1,7 @@
 import {ReactNode, createContext, useCallback, useContext, useEffect, useMemo, useState} from 'react';
 import {onAuthStateChanged, signOut as firebaseSignOut} from 'firebase/auth';
 import {fetchUserProfile} from './authService';
+import {resolveAgentGateStep, type AgentGateStep} from './agentGate';
 import {clearRoleVerification} from './pinVerification';
 import {getPortalFirebaseAuth, isFirebaseConfigured} from '../firebase/client';
 import {ensureMiwillAppAuth, signOutMiwillAppAuth} from '../firebase/miwillAppAuth';
@@ -15,6 +16,12 @@ import {
 
 export type UserRole = 'admin' | 'agent';
 
+export type AgentAccountStatus =
+  | 'pending_password_change'
+  | 'pending_2fa_setup'
+  | 'active'
+  | string;
+
 export type UserProfile = {
   uid: string;
   email: string;
@@ -23,6 +30,8 @@ export type UserProfile = {
   role: UserRole;
   isActive: boolean;
   createdAt?: Date | null;
+  status?: AgentAccountStatus;
+  forcePasswordChange?: boolean;
 };
 
 type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
@@ -30,8 +39,10 @@ type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
 type AuthContextValue = {
   status: AuthStatus;
   profile: UserProfile | null;
+  agentGateStep: AgentGateStep;
   applyProfile: (profile: UserProfile | null) => void;
   refreshProfile: () => Promise<UserProfile | null>;
+  refreshAgentClaims: () => Promise<void>;
   signOutUser: () => Promise<void>;
 };
 
@@ -45,10 +56,36 @@ function readMockProfile(): UserProfile | null {
 export function AuthProvider({children}: {children: ReactNode}) {
   const [status, setStatus] = useState<AuthStatus>('loading');
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [authClaims, setAuthClaims] = useState<Record<string, unknown>>({});
+
+  const agentGateStep = useMemo(() => {
+    if (!profile) {
+      return 'none' as AgentGateStep;
+    }
+
+    return resolveAgentGateStep(profile, authClaims);
+  }, [authClaims, profile]);
 
   const applyProfile = useCallback((next: UserProfile | null) => {
     setProfile(next);
     setStatus(next ? 'authenticated' : 'unauthenticated');
+  }, []);
+
+  const refreshAgentClaims = useCallback(async () => {
+    if (!isFirebaseConfigured) {
+      setAuthClaims({});
+      return;
+    }
+
+    const auth = getPortalFirebaseAuth();
+    const user = auth?.currentUser;
+    if (!user) {
+      setAuthClaims({});
+      return;
+    }
+
+    const token = await user.getIdTokenResult(true);
+    setAuthClaims(token.claims);
   }, []);
 
   const syncMockFromStorage = useCallback(() => {
@@ -84,6 +121,7 @@ export function AuthProvider({children}: {children: ReactNode}) {
 
         clearMockSession();
         applyProfile(nextProfile);
+        await refreshAgentClaims();
 
         try {
           await ensureMiwillAppAuth();
@@ -96,7 +134,7 @@ export function AuthProvider({children}: {children: ReactNode}) {
     });
 
     return unsubscribe;
-  }, [applyProfile, syncMockFromStorage]);
+  }, [applyProfile, refreshAgentClaims, syncMockFromStorage]);
 
   useEffect(() => {
     if (isFirebaseConfigured) {
@@ -137,13 +175,17 @@ export function AuthProvider({children}: {children: ReactNode}) {
         const user = auth?.currentUser;
         if (!user) {
           applyProfile(null);
+          setAuthClaims({});
           return null;
         }
 
         const next = await fetchUserProfile(user.uid);
         applyProfile(next);
+        await refreshAgentClaims();
         return next;
       },
+      refreshAgentClaims,
+      agentGateStep,
       signOutUser: async () => {
         clearMockSession();
         clearRoleVerification();
@@ -157,10 +199,11 @@ export function AuthProvider({children}: {children: ReactNode}) {
         }
 
         applyProfile(null);
+        setAuthClaims({});
         notifyMockAuthChanged();
       },
     }),
-    [applyProfile, profile, status],
+    [agentGateStep, applyProfile, profile, refreshAgentClaims, status],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

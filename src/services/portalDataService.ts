@@ -1,11 +1,6 @@
-import {createUserWithEmailAndPassword, signOut} from 'firebase/auth';
-import {addDoc, collection, doc, getDocs, query, serverTimestamp, setDoc, where} from 'firebase/firestore';
-import {
-  destroySecondaryFirebaseApp,
-  getPortalFirebaseDb,
-  getPortalSecondaryFirebaseAuth,
-  isFirebaseConfigured,
-} from '../firebase/client';
+import {createAgentAccountCallable} from '../auth/agentMfaService';
+import {addDoc, collection, getDocs, query, serverTimestamp, where} from 'firebase/firestore';
+import {getPortalFirebaseDb, isFirebaseConfigured} from '../firebase/client';
 import {ensureMiwillAppAuth} from '../firebase/miwillAppAuth';
 import {isMiwillAppConfigured, miwillDb} from '../firebase/miwillAppDb';
 import {mapFirestoreClientToAssignedUser} from '../utils/firestoreMappers';
@@ -20,7 +15,6 @@ export type CreateAgentInput = {
   idNumber: string;
   email: string;
   phone: string;
-  password: string;
   createdBy: string;
 };
 
@@ -49,46 +43,28 @@ export async function emailExistsInPortalUsers(email: string): Promise<boolean> 
 }
 
 export async function createPortalAgent(input: CreateAgentInput) {
-  const db = getPortalFirebaseDb();
-  const secondaryAuth = getPortalSecondaryFirebaseAuth();
-
-  if (!db || !secondaryAuth || !isFirebaseConfigured) {
+  if (!isFirebaseConfigured) {
     throw new Error('Firebase is not configured for agent creation.');
   }
 
-  try {
-    const credential = await createUserWithEmailAndPassword(
-      secondaryAuth,
-      input.email.trim(),
-      input.password,
-    );
+  const result = await createAgentAccountCallable({
+    firstName: input.firstName,
+    lastName: input.lastName,
+    dateOfBirth: input.dateOfBirth,
+    idNumber: input.idNumber,
+    email: input.email,
+    phone: input.phone,
+    createdBy: input.createdBy,
+  });
 
-    await setDoc(doc(db, 'users', credential.user.uid), {
-      uid: credential.user.uid,
-      firstName: input.firstName.trim(),
-      lastName: input.lastName.trim(),
-      dateOfBirth: input.dateOfBirth,
-      idNumber: input.idNumber,
-      email: input.email.trim().toLowerCase(),
-      phone: input.phone.trim(),
-      role: 'agent',
-      isActive: true,
-      createdAt: serverTimestamp(),
-      createdBy: input.createdBy,
-    });
-
-    await signOut(secondaryAuth);
-
-    return {
-      id: credential.user.uid,
-      firstName: input.firstName.trim(),
-      lastName: input.lastName.trim(),
-      email: input.email.trim().toLowerCase(),
-      role: 'agent',
-    };
-  } finally {
-    await destroySecondaryFirebaseApp();
-  }
+  return {
+    id: result.uid,
+    firstName: result.firstName,
+    lastName: result.lastName,
+    email: result.email,
+    role: 'agent' as const,
+    temporaryPassword: result.temporaryPassword,
+  };
 }
 
 export async function createMiwillAppClient(input: CreateClientInput) {
