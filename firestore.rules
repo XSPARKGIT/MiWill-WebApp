@@ -1,0 +1,103 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isPortalStaff() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'agent']
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isActive != false;
+    }
+
+    match /waitlist/{documentId} {
+      allow create: if request.auth == null
+        && request.resource.data.keys().hasOnly([
+          'createdAt',
+          'email',
+          'environment',
+          'source'
+        ])
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.email is string
+        && request.resource.data.email.size() >= 5
+        && request.resource.data.email.size() <= 320
+        && request.resource.data.environment is string
+        && request.resource.data.environment.size() >= 3
+        && request.resource.data.environment.size() <= 20
+        && request.resource.data.source == 'landing-page';
+
+      allow read, update, delete: if false;
+    }
+
+    match /users/{userId} {
+      function isOwner() {
+        return isSignedIn() && request.auth.uid == userId;
+      }
+
+      function isValidPortalRole(role) {
+        return role == 'admin' || role == 'agent';
+      }
+
+      function isValidUserCreate() {
+        let data = request.resource.data;
+
+        return data.uid == userId
+          && data.email is string
+          && data.email.size() >= 5
+          && data.email.size() <= 320
+          && data.firstName is string
+          && data.firstName.size() >= 1
+          && data.lastName is string
+          && data.lastName.size() >= 1
+          && isValidPortalRole(data.role)
+          && data.isActive == true
+          && data.createdAt is timestamp
+          && (!('dateOfBirth' in data) || data.dateOfBirth is string)
+          && (!('idNumber' in data) || (data.idNumber is string && data.idNumber.size() == 13))
+          && (!('phone' in data) || data.phone == null || data.phone is string)
+          && (!('popiaAcceptedAt' in data) || data.popiaAcceptedAt is timestamp);
+      }
+
+      allow create: if isOwner() && isValidUserCreate();
+
+      function isDemoProfile() {
+        return resource.data.email == 'testaccount@gmail.com';
+      }
+
+      // Portal staff dashboards list agents/admins; signed-in users read profiles for assignments.
+      allow read: if isSignedIn();
+
+      allow update: if isOwner() || isPortalStaff();
+
+      allow delete: if false;
+    }
+
+    match /clients/{clientId} {
+      allow read, create: if isPortalStaff();
+      allow update, delete: if false;
+    }
+
+    match /leads/{leadId} {
+      allow read, create, update: if isSignedIn();
+      allow delete: if false;
+    }
+
+    match /activities/{activityId} {
+      allow read: if isPortalStaff();
+      allow write: if false;
+    }
+
+    match /notes/{noteId} {
+      allow read: if isPortalStaff();
+      allow write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

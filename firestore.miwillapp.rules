@@ -1,0 +1,32 @@
+rules_version = '2';
+
+// MiWill App (miwillapp) — portal client reads for authenticated users.
+// Publish: npm run firebase:deploy:miwillapp-rules
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    match /clients/{clientId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update, delete: if false;
+    }
+
+    match /activities/{activityId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    match /notes/{noteId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

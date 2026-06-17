@@ -1,5 +1,6 @@
- import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform, useInView } from 'motion/react';
+import {Link} from 'react-router-dom';
 import { 
   CheckCircle2, 
   Shield, 
@@ -44,6 +45,7 @@ import {
   PRICING_FREE_FEATURES,
   PRICING_PAID_FEATURES,
 } from './config/content';
+import {saveWaitlistLead} from './firebase/waitlist';
 
 // --- Components ---
 
@@ -146,7 +148,7 @@ const Hero = () => {
 
   return (
     <section id="home" className="relative min-h-screen flex items-center pt-36 pb-20 overflow-hidden bg-accent">
-      <div className="absolute inset-0 z-0 bg-gradient-to-b from-[#5C9AAB] via-[#5C9AAB] to-[#417585]" />
+      <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#62A8B5] via-[#5097A4] to-[#458A97]" />
 
       <div className="max-w-[1400px] mx-auto px-6 grid lg:grid-cols-2 gap-20 items-center relative z-10">
         <motion.div 
@@ -182,8 +184,8 @@ const Hero = () => {
           
           <div className="flex flex-col sm:flex-row gap-6 items-center">
             <Magnetic strength={0.2}>
-              <a 
-                href="#download" 
+              <Link 
+                to="/login" 
                 data-cursor="DOWNLOAD"
                 className="inline-flex items-center justify-center gap-2.5 px-10 md:px-12 py-4 rounded-full text-sm md:text-base font-black uppercase tracking-[0.2em] bg-[#368396] text-white shadow-[0_18px_46px_rgba(54,131,150,0.5)] border border-white/30 group relative overflow-hidden"
               >
@@ -194,7 +196,7 @@ const Hero = () => {
                 <motion.div 
                   className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 />
-              </a>
+              </Link>
             </Magnetic>
             
             <a 
@@ -714,13 +716,13 @@ const BackgroundReveal = () => {
               Secure. Private. <br />
               <span className="text-accent">Always Accessible.</span>
             </p>
-            <a
-              href="#download"
+            <Link
+              to="/login"
               className="mt-8 inline-flex items-center gap-3 px-8 py-3 rounded-full bg-accent text-slate-950 font-black uppercase tracking-[0.22em] text-[11px] shadow-[0_18px_40px_rgba(15,23,42,0.8)] border border-white/40"
             >
               Start protecting my legacy
               <ArrowRight className="w-4 h-4" />
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -733,12 +735,19 @@ const BackgroundReveal = () => {
   );
 };
 
-const Pricing = ({ onWaitlist }: { onWaitlist?: (email: string) => void }) => {
+const Pricing = ({
+  onWaitlist,
+  isSubmitting = false,
+}: {
+  onWaitlist?: (email: string) => Promise<void> | void;
+  isSubmitting?: boolean;
+}) => {
   const [email, setEmail] = useState("");
 
-  const handleJoin = () => {
+  const handleJoin = async () => {
     if (!email.trim()) return;
-    onWaitlist?.(email.trim());
+    await onWaitlist?.(email.trim());
+    setEmail("");
   };
 
   return (
@@ -831,9 +840,10 @@ const Pricing = ({ onWaitlist }: { onWaitlist?: (email: string) => void }) => {
               <button
                 type="button"
                 onClick={handleJoin}
-                className="btn-primary !px-10 !py-4"
+                disabled={isSubmitting}
+                className="btn-primary !px-10 !py-4 disabled:cursor-not-allowed disabled:opacity-70"
               >
-                Join waitlist
+                {isSubmitting ? 'Saving...' : 'Join waitlist'}
               </button>
             </div>
             <p className="mt-5 text-slate-400 text-xs md:text-sm font-medium">
@@ -1275,14 +1285,17 @@ const Footer = ({ onToast }: { onToast?: ToastFn }) => {
             transition={{ delay: 0.3 }}
             className="flex flex-col items-center lg:items-start gap-8"
           >
-            <motion.a 
-              href="#download" 
+            <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="btn-primary !bg-accent !text-white hover:!bg-accent/90 !px-10 !py-4 text-base md:text-lg shadow-2xl shadow-slate-300/70"
             >
-              Get Started Now
-            </motion.a>
+              <Link
+                to="/login"
+                className="btn-primary !bg-accent !text-white hover:!bg-accent/90 !px-10 !py-4 text-base md:text-lg shadow-2xl shadow-slate-300/70"
+              >
+                Get Started Now
+              </Link>
+            </motion.div>
             <div className="flex items-center gap-5">
               {[Share2, Globe].map((Icon, i) => (
                 <motion.div 
@@ -1307,6 +1320,11 @@ const Footer = ({ onToast }: { onToast?: ToastFn }) => {
                 Product
               </h4>
               <ul className="space-y-5 font-semibold text-sm md:text-base">
+                <motion.li whileHover={{ x: 10 }}>
+                  <Link to="/login" className="hover:text-accent transition-colors">
+                    Login · Agent dashboard
+                  </Link>
+                </motion.li>
                 {['Process', 'Security', 'Timeline', 'Support'].map((item, i) => (
                   <motion.li key={i} whileHover={{ x: 10 }}>
                     <a href={`#${item.toLowerCase().replace(' ', '-')}`} className="hover:text-accent transition-colors">
@@ -1383,6 +1401,7 @@ const Footer = ({ onToast }: { onToast?: ToastFn }) => {
 export default function MiWillLanding() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastVisible, setToastVisible] = useState(false);
+  const [isSavingWaitlist, setIsSavingWaitlist] = useState(false);
   const toastTimeoutRef = useRef<number | null>(null);
 
   const showToast: ToastFn = (message) => {
@@ -1396,7 +1415,7 @@ export default function MiWillLanding() {
     }, 2400) as unknown as number;
   };
 
-  const handleWaitlistEmail = (email: string) => {
+  const openWaitlistMailto = (email: string) => {
     const subject = encodeURIComponent("MiWill waitlist – I am interested");
     const body = encodeURIComponent(
       `Hi MiWill team,
@@ -1408,7 +1427,28 @@ Email: ${email}
 Thank you.`
     );
     window.location.href = `mailto:studio@xspark.co.za?subject=${subject}&body=${body}`;
-    showToast("We’ve opened your email app to join the waitlist");
+  };
+
+  const handleWaitlistEmail = async (email: string) => {
+    setIsSavingWaitlist(true);
+
+    try {
+      const savedToFirebase = await saveWaitlistLead(email);
+
+      if (savedToFirebase) {
+        showToast("You’re on the waitlist");
+        return;
+      }
+
+      openWaitlistMailto(email);
+      showToast("Firebase is not configured yet, so we opened your email app");
+    } catch (error) {
+      console.error('Failed to save waitlist lead to Firebase.', error);
+      openWaitlistMailto(email);
+      showToast("Firebase save failed, so we opened your email app");
+    } finally {
+      setIsSavingWaitlist(false);
+    }
   };
 
   return (
@@ -1425,7 +1465,7 @@ Thank you.`
         <Reveal><ScreensWalkthrough /></Reveal>
         <Reveal><WhyMiWill /></Reveal>
         <Reveal><Testimonials /></Reveal>
-        <Reveal><Pricing onWaitlist={handleWaitlistEmail} /></Reveal>
+        <Reveal><Pricing onWaitlist={handleWaitlistEmail} isSubmitting={isSavingWaitlist} /></Reveal>
         <Reveal><FAQ /></Reveal>
         <FinalCTA onToast={showToast} />
       </main>

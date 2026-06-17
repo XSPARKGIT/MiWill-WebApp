@@ -1,4 +1,5 @@
 node_modules/
+.npm-cache/
 build/
 dist/
 coverage/
@@ -6,3 +7,6 @@ coverage/
 *.log
 .env*
 !.env.example
+!.env.staging.example
+!.env.production.example
+!.firebaserc.example

@@ -1,14 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Montserrat:wght@700;800&family=Playfair+Display:ital,wght@0,400;1,400&display=swap');
 @import "tailwindcss";
 
 @theme {
   --color-primary: #717171;
-  --color-accent: #5C9AAB;
-  --color-bg-soft: #5C9AAB;
-  --color-highlight: #5C9AAB;
+  --color-accent: #5097A4;
+  --color-bg-soft: #eef2f0;
+  --color-highlight: #5097A4;
   
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Space Grotesk", "Inter", sans-serif;
+}
+
+:root {
+  --mw-teal: #5097a4;
+  --mw-teal-light: #62a8b5;
+  --mw-teal-dark: #458a97;
+  --mw-teal-darker: #3e8491;
+  --mw-teal-rgb: 80, 151, 164;
 }
 
 @layer base {
@@ -70,7 +79,203 @@
 }
 
 .bg-grid {
-  background-image: linear-gradient(to right, rgba(92, 154, 171, 0.08) 1px, transparent 1px),
-                    linear-gradient(to bottom, rgba(92, 154, 171, 0.08) 1px, transparent 1px);
+  background-image: linear-gradient(to right, rgba(80, 151, 164, 0.08) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(80, 151, 164, 0.08) 1px, transparent 1px);
   background-size: 40px 40px;
+}
+
+/* —— MiWill Agent Dashboard (production shell) —— */
+.agent-dashboard {
+  --mw-teal: #5097a4;
+  --mw-navy: #1e2d3d;
+  --mw-sidebar: #f4f6f8;
+  --mw-card: #ffffff;
+  --mw-cta: #5097a4;
+  --mw-accent-italic: #5097a4;
+  --mw-mint: #5097a4;
+  --mw-muted-teal: #6b7c93;
+  --mw-muted-dark: #6b7c93;
+  --mw-divider: #e5e9ee;
+  --mw-row-divider: #e5e9ee;
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+.agent-dashboard .mw-section-label {
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.agent-dashboard .mw-heading-display {
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+.agent-dashboard .mw-accent-serif {
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  font-style: normal;
+}
+
+.agent-dash-transition {
+  transition: color 200ms ease, background-color 200ms ease, border-color 200ms ease, opacity 200ms ease,
+    transform 200ms ease;
+}
+
+/* Softer atmosphere behind dashboard content */
+.agent-dashboard-canvas {
+  background-color: #f8fafb;
+  background-image:
+    radial-gradient(ellipse 120% 80% at 50% -30%, rgba(80, 151, 164, 0.14), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 100% 20%, rgba(80, 151, 164, 0.07), transparent 50%),
+    radial-gradient(ellipse 50% 40% at 0% 80%, rgba(80, 151, 164, 0.05), transparent 45%);
+}
+
+.agent-overview-stat-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 1rem;
+  box-shadow:
+    0 4px 6px -1px rgba(62, 132, 145, 0.12),
+    0 12px 28px -8px rgba(80, 151, 164, 0.38);
+  transition:
+    transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 280ms ease;
+}
+
+.agent-overview-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 8px 16px -4px rgba(62, 132, 145, 0.14),
+    0 20px 40px -12px rgba(80, 151, 164, 0.48);
+}
+
+.agent-overview-panel {
+  border-radius: 1rem;
+  border: 1px solid #e5e9ee;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%);
+  box-shadow:
+    0 1px 2px rgba(30, 45, 61, 0.04),
+    0 8px 24px rgba(30, 45, 61, 0.06);
+  transition: box-shadow 260ms ease, border-color 260ms ease;
+}
+
+.agent-overview-panel:hover {
+  border-color: rgba(80, 151, 164, 0.22);
+  box-shadow:
+    0 2px 4px rgba(30, 45, 61, 0.05),
+    0 12px 32px rgba(30, 45, 61, 0.08);
+}
+
+.agent-pipeline-cell {
+  border-radius: 0.75rem;
+  border: 1px solid #e8ecf0;
+  background: linear-gradient(165deg, #ffffff 0%, #f5f8f9 100%);
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.agent-pipeline-cell:hover {
+  transform: translateY(-2px);
+  border-color: rgba(80, 151, 164, 0.35);
+  box-shadow: 0 6px 16px rgba(80, 151, 164, 0.12);
+}
+
+.agent-activity-row {
+  border-radius: 0.75rem;
+  transition: background-color 200ms ease;
+}
+
+.agent-activity-row:hover {
+  background-color: rgba(80, 151, 164, 0.06);
+}
+
+/* —— My Users list —— */
+.agent-user-row {
+  box-shadow:
+    0 1px 2px rgba(30, 45, 61, 0.04),
+    0 2px 6px rgba(30, 45, 61, 0.03);
+}
+
+.agent-user-row:hover {
+  border-color: rgba(80, 151, 164, 0.35);
+  box-shadow:
+    0 4px 12px rgba(80, 151, 164, 0.12),
+    0 8px 24px rgba(30, 45, 61, 0.06);
+  transform: translateY(-1px);
+}
+
+.agent-user-row:active {
+  transform: translateY(0);
+}
+
+/* —— Client details drawer —— */
+.agent-client-drawer {
+  box-shadow: -12px 0 40px rgba(30, 45, 61, 0.12);
+}
+
+.agent-details-section + .agent-details-section {
+  padding-top: 0.25rem;
+}
+
+.agent-details-timeline-item + .agent-details-timeline-item {
+  border-top: 1px solid #eef1f4;
+}
+
+/* —— Lead pipeline Kanban —— */
+.agent-kanban-column {
+  box-shadow:
+    0 1px 2px rgba(30, 45, 61, 0.04),
+    0 4px 12px rgba(30, 45, 61, 0.04);
+}
+
+.agent-lead-card {
+  box-shadow:
+    0 1px 2px rgba(30, 45, 61, 0.04),
+    0 2px 6px rgba(30, 45, 61, 0.03);
+}
+
+.agent-lead-card:hover {
+  border-color: rgba(80, 151, 164, 0.35);
+  box-shadow:
+    0 4px 14px rgba(80, 151, 164, 0.12),
+    0 8px 20px rgba(30, 45, 61, 0.06);
+  transform: translateY(-2px);
+}
+
+/* —— Notes & activity —— */
+.notes-panel {
+  border-radius: 12px;
+  border: 0.5px solid #e5e9ee;
+  background: #ffffff;
+}
+
+/* —— Login screen (PIN + role) —— */
+@keyframes login-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-6px);
+  }
+  40%,
+  80% {
+    transform: translateX(6px);
+  }
+}
+
+.login-screen-shake {
+  animation: login-shake 0.45s ease-in-out;
+}
+
+.login-keypad-key {
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.login-quick-card {
+  user-select: none;
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Menu, X } from "lucide-react";
+import { Link } from "react-router-dom";
 import mainLogo from "/assets/ThirdLogo.png";
 
 const NAV_LINKS = [
@@ -50,12 +51,20 @@ export function Navbar() {
               {link.name}
             </a>
           ))}
-          <a
-            href="#cta"
-            className="btn-primary !py-3 !px-7 text-[11px] uppercase tracking-[0.22em]"
+          <Link
+            to="/login"
+            className="text-[11px] font-black text-slate-300/60 hover:text-slate-50 transition-colors uppercase tracking-[0.22em]"
           >
-            Get Started
-          </a>
+            Agent / Admin
+          </Link>
+          <button
+            type="button"
+            disabled
+            aria-disabled="true"
+            className="btn-primary !py-3 !px-7 text-[11px] uppercase tracking-[0.22em] cursor-not-allowed opacity-55 pointer-events-none hover:scale-100 active:scale-100"
+          >
+            Login
+          </button>
         </div>
 
         <button
@@ -92,13 +101,21 @@ export function Navbar() {
                 {link.name}
               </a>
             ))}
-            <a
-              href="#cta"
-              className="btn-primary text-xl py-5 mt-8"
+            <Link
+              to="/login"
+              className="text-4xl font-black text-slate-50 font-display tracking-tighter"
               onClick={() => setIsOpen(false)}
             >
-              Get Started
-            </a>
+              Agent / Admin
+            </Link>
+            <button
+              type="button"
+              disabled
+              aria-disabled="true"
+              className="btn-primary text-xl py-5 mt-4 cursor-not-allowed opacity-55 pointer-events-none hover:scale-100 active:scale-100"
+            >
+              Log In
+            </button>
           </motion.div>
         )}
       </AnimatePresence>
